@@ -15,7 +15,9 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // ─── Routes ───────────────────────────────────────────────
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
 
 // ─── Serve Frontend Pages ─────────────────────────────────
 app.get("/", (req, res) => {
