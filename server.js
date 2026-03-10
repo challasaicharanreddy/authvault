@@ -13,6 +13,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+// ─── Rate Limiting ─────────────────────────────────────────
+const { generalLimiter, authLimiter } = require("./middleware/rateLimiter");
+app.use(generalLimiter);                    // Apply to all routes
+app.use("/api/auth", authLimiter);          // Extra strict on auth routes
+
 // ─── Routes ───────────────────────────────────────────────
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
