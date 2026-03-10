@@ -45,4 +45,59 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { register };
+// ─── LOGIN ────────────────────────────────────────────────
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Validate fields
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // 2. Check if user exists
+    const users = readUsers();
+    const user = users.find((u) => u.email === email);
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // 3. Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // 4. Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    // 5. Send refresh token as HTTP-only cookie
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // 6. Send access token and user info
+    res.status(200).json({
+      message: "Login successful!",
+      accessToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { register, login};
