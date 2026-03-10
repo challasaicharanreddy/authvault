@@ -41,9 +41,22 @@ app.get("/dashboard", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "dashboard.html"));
 });
 
+app.get("/reset-password", (req, res) => {
+    res.sendFile(path.join(__dirname, "views", "reset-password.html"));
+  });
+
 // ─── 404 Handler ──────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
+});
+
+// ─── Global Error Handler ─────────────────────────────────
+process.on("uncaughtException", (error) => {
+  console.error("❌ Uncaught Exception:", error.message);
+});
+
+process.on("unhandledRejection", (error) => {
+  console.error("❌ Unhandled Rejection:", error.message);
 });
 
 // ─── Start Server ─────────────────────────────────────────

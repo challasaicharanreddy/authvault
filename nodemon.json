@@ -1,0 +1,5 @@
+{
+    "ignore": [".env", "data/*", "data/resetTokens.json"],
+    "ext": "js,json",
+    "watch": ["*.js", "routes/", "controllers/", "middleware/", "utils/", "config/", "models/"]
+  }
