@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — AuthVault</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="logo">🔐 AuthVault</a>
+    <div class="navbar-links">
+      <span id="userName" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+      <button class="btn btn-outline" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <div>
+        <h1 id="welcomeText" style="font-size: 1.8rem;">Welcome back! 👋</h1>
+        <p style="color: var(--text-muted); margin-top: 0.25rem;" id="userEmail"></p>
+      </div>
+      <div style="background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+                  padding: 0.4rem 1rem; border-radius: 50px; color: #a78bfa; font-size: 0.85rem;"
+           id="userRole">
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="dash-card purple">
+        <div class="card-icon">🔐</div>
+        <h3>Auth Status</h3>
+        <div class="card-value" style="color: #10b981; font-size: 1.2rem;">✅ Authenticated</div>
+      </div>
+
+      <div class="dash-card cyan">
+        <div class="card-icon">🎫</div>
+        <h3>Token Type</h3>
+        <div class="card-value" style="font-size: 1.2rem; color: var(--accent);">JWT Access Token</div>
+      </div>
+
+      <div class="dash-card amber">
+        <div class="card-icon">⏱️</div>
+        <h3>Session</h3>
+        <div class="card-value" style="font-size: 1.2rem; color: var(--accent2);" id="sessionTime">Active</div>
+      </div>
+
+      <div class="dash-card green">
+        <div class="card-icon">👑</div>
+        <h3>Access Level</h3>
+        <div class="card-value" style="font-size: 1.2rem; color: var(--success);" id="accessLevel">User</div>
+      </div>
+    </div>
+
+    <!-- User Info Card -->
+    <div style="margin: 0 2rem; background: var(--surface); border: 1px solid var(--border);
+                border-radius: 16px; padding: 1.75rem;">
+      <h2 style="font-size: 1.2rem; margin-bottom: 1.25rem; color: var(--text-muted);">
+        👤 Your Profile
+      </h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Name</div>
+          <div style="font-weight: 600;" id="profileName">—</div>
+        </div>
+        <div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Email</div>
+          <div style="font-weight: 600;" id="profileEmail">—</div>
+        </div>
+        <div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">Role</div>
+          <div style="font-weight: 600;" id="profileRole">—</div>
+        </div>
+        <div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.25rem;">User ID</div>
+          <div style="font-weight: 600; font-size: 0.85rem;" id="profileId">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Check Auth on Page Load ──────────────────────────
+    window.addEventListener('load', async () => {
+      const token = localStorage.getItem('accessToken');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      // Verify token with backend
+      try {
+        const res = await fetch('/api/user/dashboard', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) {
+          localStorage.clear();
+          window.location.href = '/login';
+          return;
+        }
+
+        // Populate UI
+        document.getElementById('welcomeText').textContent = `Welcome back, ${user.name}! 👋`;
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userName').textContent = user.name;
+        document.getElementById('userRole').textContent = `👑 ${user.role?.toUpperCase()}`;
+        document.getElementById('accessLevel').textContent = user.role?.toUpperCase();
+        document.getElementById('profileName').textContent = user.name;
+        document.getElementById('profileEmail').textContent = user.email;
+        document.getElementById('profileRole').textContent = user.role;
+        document.getElementById('profileId').textContent = user.id;
+
+      } catch (err) {
+        window.location.href = '/login';
+      }
+    });
+
+    // ─── Logout ───────────────────────────────────────────
+    function logout() {
+      localStorage.clear();
+      window.location.href = '/login';
+    }
+  </script>
+</body>
+</html>
